@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  polymarket-detector:
+    build: .
+    container_name: polymarket_insider_detector
+    restart: unless-stopped
+    
+    # Mount database as volume (persists data + accessible from host)
+    volumes:
+      - ./data:/app/data
+      - ./main.py:/app/main.py  # Hot-reload code changes
+      - ./explore_data.py:/app/explore_data.py
+      - ./control_api.py:/app/control_api.py
+    
+    # Environment variables (optional)
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Europe/London
+    
+    # Resource limits (adjust based on monitoring)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '4.0'      # Max 4 CPU cores
+    #       memory: 2G       # Max 2GB RAM
+    #     reservations:
+    #       cpus: '0.25'     # Guaranteed 25% of a core
+    #       memory: 128M     # Guaranteed 128MB RAM
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    ports:
+      - "8585:8585"  # Expose control API port
